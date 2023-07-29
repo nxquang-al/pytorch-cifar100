@@ -44,9 +44,11 @@ class BasicBlock(nn.Module):
                 nn.Conv2d(in_channels, out_channels * BasicBlock.expansion, kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(out_channels * BasicBlock.expansion)
             )
+        self.add_relu = nn.quantized.FloatFunctional()
 
     def forward(self, x):
-        return nn.ReLU(inplace=True)(self.residual_function(x) + self.shortcut(x))
+        # return nn.ReLU(inplace=True)(self.residual_function(x) + self.shortcut(x))
+        return self.add_relu.add_relu(self.residual_function(x), self.shortcut(x))
 
 class BottleNeck(nn.Module):
     """Residual block for resnet over 50 layers
@@ -73,9 +75,11 @@ class BottleNeck(nn.Module):
                 nn.Conv2d(in_channels, out_channels * BottleNeck.expansion, stride=stride, kernel_size=1, bias=False),
                 nn.BatchNorm2d(out_channels * BottleNeck.expansion)
             )
+        self.skip_add_relu = nn.quantized.FloatFunctional()
 
     def forward(self, x):
-        return nn.ReLU(inplace=True)(self.residual_function(x) + self.shortcut(x))
+        # return nn.ReLU(inplace=True)(self.residual_function(x) + self.shortcut(x))
+        return self.skip_add_relu.add_relu(self.residual_function(x), self.shortcut(x))
 
 class ResNet(nn.Module):
 
